@@ -15,7 +15,9 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: contoso-air-mew
+        azure.workload.identity/use: "true"
     spec:
+      serviceAccountName: sc-account-f94e2795-9a7f-4030-bcbe-cb70c8d6e662
       containers:
         - name: contoso-air-mew
           image: myregistryz7lz.azurecr.io/contoso-air:latest
@@ -35,6 +37,8 @@ spec:
             - secretRef:
                 name: secret-ref
                 optional: true
+            - secretRef:
+                name: sc-openai13e3f-secret
           livenessProbe:
             tcpSocket:
               port: 3000
