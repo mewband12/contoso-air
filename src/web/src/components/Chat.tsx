@@ -26,6 +26,9 @@ interface ChatProps {
   defaultOpen?: boolean;
 }
 
+type SearchStatus = "checking" | "connected" | "unavailable" | "not-configured";
+type SearchAuthentication = "managed-identity" | "api-key" | null;
+
 const defaultSystem =
   "You are a helpful AI travel assistant for Contoso Air. Provide concise, friendly answers and suggest follow‑up travel tips. Do not reply in markdown. Reply in unformatted plain text.";
 
@@ -51,6 +54,9 @@ const Chat: React.FC<ChatProps> = ({
   ]);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
+  const [searchStatus, setSearchStatus] = useState<SearchStatus>("checking");
+  const [searchAuthentication, setSearchAuthentication] =
+    useState<SearchAuthentication>(null);
   const [thinkingId, setThinkingId] = useState<string | null>(null);
   const thinkingRef = useRef<string | null>(null);
   useEffect(() => {
@@ -287,6 +293,30 @@ const Chat: React.FC<ChatProps> = ({
     }
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const controller = new AbortController();
+    fetch("/api/search/status", { signal: controller.signal })
+      .then((response) => response.json())
+      .then(
+        (result: {
+          status?: SearchStatus;
+          authentication?: SearchAuthentication;
+        }) => {
+          setSearchStatus(result.status || "unavailable");
+          setSearchAuthentication(result.authentication || null);
+        }
+      )
+      .catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          setSearchStatus("unavailable");
+        }
+      });
+
+    return () => controller.abort();
+  }, [open]);
+
   const resetMessages = useCallback(() => {
     setMessages([
       {
@@ -342,8 +372,26 @@ const Chat: React.FC<ChatProps> = ({
               <span className="text-sm font-semibold tracking-wide text-white">
                 Travel Assistant
               </span>
-              <span className="text-[11px] text-white/60">
-                AI beta · Experimental
+              <span className="flex items-center gap-1.5 text-[11px] text-white/60">
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    searchStatus === "connected"
+                      ? "bg-emerald-400"
+                      : searchStatus === "checking"
+                        ? "bg-amber-300 animate-pulse"
+                        : "bg-white/30"
+                  }`}
+                  aria-hidden="true"
+                />
+                {searchStatus === "connected"
+                  ? `Azure AI Search connected${
+                      searchAuthentication === "managed-identity"
+                        ? " with managed identity"
+                        : ""
+                    }`
+                  : searchStatus === "checking"
+                    ? "Checking Azure AI Search"
+                    : "Azure AI Search unavailable"}
               </span>
             </div>
             <button
