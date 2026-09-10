@@ -7,4 +7,9 @@ metadata:
     app.kubernetes.io/name: contoso-air-mew
     kubernetes.azure.com/generator: devhub
 data:
-  AZURE_SEARCH_RESOURCE_ID: /subscriptions/d88c020a-2180-43da-91a2-f6cc01f25946/resourceGroups/mew11-azure-ai-workshop-rg/providers/Microsoft.Search/searchServices/aiworkshop-search-rmsgmwk472oxi
+  AZURE_OPENAI_API_VERSION: 2024-12-01-preview
+  AZURE_OPENAI_DEPLOYMENT: gpt-5.4-mini
+  AZURE_SEARCH_RESOURCE_ID: >-
+    /subscriptions/d88c020a-2180-43da-91a2-f6cc01f25946/resourceGroups/mew11-azure-ai-workshop-rg/providers/Microsoft.Search/searchServices/aiworkshop-search-rmsgmwk472oxi
+  CHAT_PROVIDER: azure
+  LOG_CHAT: 'true'
